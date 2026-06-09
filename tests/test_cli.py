@@ -37,3 +37,15 @@ def test_main_end_to_end_writes_valid_svg(tmp_path):
 def test_main_missing_file_returns_nonzero(tmp_path):
     exit_code = main([str(tmp_path / "nope.png"), "--quiet"])
     assert exit_code == 2  # missing input has its own exit code, distinct from 1
+
+
+def test_main_auto_flag_writes_svg(tmp_path):
+    out = tmp_path / "auto.svg"
+    exit_code = main([
+        "tests/fixtures/sample.png", "-o", str(out),
+        "--auto", "--auto-budget", "3", "--no-smooth", "--quiet",
+    ])
+    assert exit_code == 0
+    assert out.exists()
+    text = out.read_text()
+    assert "<svg" in text and "<path" in text

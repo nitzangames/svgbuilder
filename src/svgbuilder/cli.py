@@ -49,6 +49,11 @@ def _build_parser():
                    help="Disable median-filter denoising before quantization.")
     p.add_argument("--bg", choices=["auto", "white", "none"], default="auto",
                    help="Background handling for transparent images.")
+    p.add_argument("--auto", action="store_true",
+                   help="Auto-tune tracing parameters by rendering and scoring "
+                        "candidates (needs the [auto] extra).")
+    p.add_argument("--auto-budget", type=int, default=6, dest="auto_budget",
+                   help="Max candidate evaluations for --auto (default 6).")
     p.add_argument("--quiet", action="store_true", help="Suppress non-error output.")
     p.add_argument("--version", action="version", version=f"svgbuilder {__version__}")
     return p
@@ -61,11 +66,24 @@ def main(argv=None):
         print(f"error: input file not found: {args.input}", file=sys.stderr)
         return 2
 
+    auto_info = None
     try:
         params = build_params(args.preset, args.colors, args.filter_speckle, args.mode)
         img = load_image(args.input, max_size=args.max_size, bg=args.bg)
-        img = quantize(img, colors=params["colors"], smooth=not args.no_smooth)
-        svg = vectorize(img, params)
+        if args.auto:
+            try:
+                from .autotune import auto_vectorize
+            except ImportError:
+                print("error: --auto needs the [auto] extra. Install it with: "
+                      "pip install 'svgbuilder[auto]'", file=sys.stderr)
+                return 1
+            svg, params, best_score, evals = auto_vectorize(
+                img, params, smooth=not args.no_smooth, budget=args.auto_budget
+            )
+            auto_info = f"auto: score={best_score:.3f} in {evals} evals"
+        else:
+            img = quantize(img, colors=params["colors"], smooth=not args.no_smooth)
+            svg = vectorize(img, params)
     except Exception as exc:  # surface a clean message, not a traceback
         print(f"error: failed to vectorize {args.input}: {exc}", file=sys.stderr)
         return 1
@@ -79,9 +97,12 @@ def main(argv=None):
         return 1
 
     if not args.quiet:
-        print(f"wrote {out_path}  "
-              f"(colors={params['colors']}, paths={svg.count('<path')}, "
-              f"bytes={len(svg)})")
+        line = (f"wrote {out_path}  "
+                f"(colors={params['colors']}, paths={svg.count('<path')}, "
+                f"bytes={len(svg)})")
+        if auto_info:
+            line += f"  [{auto_info}]"
+        print(line)
     return 0
 
 
