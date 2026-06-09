@@ -36,4 +36,4 @@ def test_main_end_to_end_writes_valid_svg(tmp_path):
 
 def test_main_missing_file_returns_nonzero(tmp_path):
     exit_code = main([str(tmp_path / "nope.png"), "--quiet"])
-    assert exit_code != 0
+    assert exit_code == 2  # missing input has its own exit code, distinct from 1
