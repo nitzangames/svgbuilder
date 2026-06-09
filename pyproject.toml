@@ -21,6 +21,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 auto = [
     "resvg-py>=0.1.5",
+    "cairosvg>=2.7",          # fallback renderer if resvg is unavailable
     "scikit-image>=0.21",
     "numpy>=1.24",
 ]
