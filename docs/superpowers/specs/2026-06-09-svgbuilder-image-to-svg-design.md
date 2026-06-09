@@ -174,8 +174,11 @@ Friendly, actionable messages (not stack traces) for:
 
 ## 9. Key research findings (basis for this design)
 
-- VTracer 0.6.15 has prebuilt CPython 3.14 wheels (verified via PyPI JSON),
-  including macOS arm64 — no Rust source build needed.
+- VTracer 0.6.15 publishes prebuilt CPython 3.14 wheels, but during
+  implementation that wheel was found to **segfault whenever any tuning
+  parameter is passed** (pyo3/Python 3.14 bug). Parameter passing works
+  correctly on Python 3.10–3.13, so the tool requires `>=3.10,<3.14` and runs
+  in a Python 3.12 venv. Revisit once vtracer ships a fixed cp314 wheel.
 - Pillow `FASTOCTREE`, dither off, is the right deterministic RGBA pre-quantizer.
 - LLM-authored SVG is unreliable for complex/detailed art (SVGenius, LLM4SVG,
   StarVector all converge on this) — so the critic loop tunes parameters, and a
