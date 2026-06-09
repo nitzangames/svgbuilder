@@ -34,3 +34,13 @@ def render_svg(svg, size):
     if img.size != size:
         img = img.resize(size, Image.Resampling.LANCZOS)
     return img
+
+
+def score(candidate_rgb, source_rgb):
+    """Color-aware SSIM between two equal-size RGB images. Higher is closer.
+
+    Returns a float in roughly [-1, 1]; 1.0 means identical.
+    """
+    a = np.asarray(candidate_rgb, dtype=np.float64)
+    b = np.asarray(source_rgb, dtype=np.float64)
+    return float(structural_similarity(a, b, channel_axis=2, data_range=255.0))
