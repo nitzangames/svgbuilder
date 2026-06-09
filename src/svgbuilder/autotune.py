@@ -41,6 +41,10 @@ def score(candidate_rgb, source_rgb):
 
     Returns a float in roughly [-1, 1]; 1.0 means identical.
     """
+    if candidate_rgb.size != source_rgb.size:
+        raise ValueError(
+            f"score() needs equal-size images, got {candidate_rgb.size} vs {source_rgb.size}"
+        )
     a = np.asarray(candidate_rgb, dtype=np.float64)
     b = np.asarray(source_rgb, dtype=np.float64)
     return float(structural_similarity(a, b, channel_axis=2, data_range=255.0))
@@ -89,6 +93,8 @@ def auto_vectorize(source_rgba, base_params, smooth=True, budget=6):
     while improved and evals < budget:
         improved = False
         for knob, values in _SEARCH.items():
+            if evals >= budget:
+                break
             for value in values:
                 if evals >= budget:
                     break
@@ -101,6 +107,8 @@ def auto_vectorize(source_rgba, base_params, smooth=True, budget=6):
                 )
                 evals += 1
                 if candidate_score > best_score:
+                    # In-place coordinate descent: accepting a knob change updates
+                    # `params`, so later knobs in this pass build on the improvement.
                     best_score, best_svg, params = candidate_score, svg, candidate
                     improved = True
 
