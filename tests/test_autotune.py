@@ -33,3 +33,32 @@ def test_score_different_images_is_lower_than_identical():
     a = _Image.new("RGB", (32, 32), (30, 110, 70))
     b = _Image.new("RGB", (32, 32), (200, 30, 30))
     assert score(a, b) < score(a, a)
+
+
+from svgbuilder.autotune import auto_vectorize
+from svgbuilder.preprocess import load_image
+from svgbuilder.presets import get_preset
+
+_FIXTURE = "tests/fixtures/sample.png"
+
+
+def test_auto_vectorize_returns_svg_and_respects_budget():
+    src = load_image(_FIXTURE, max_size=1000, bg="auto")
+    svg, params, best, evals = auto_vectorize(src, get_preset("clean"), smooth=False, budget=5)
+    assert "<path" in svg
+    assert 1 <= evals <= 5
+    assert -1.0 <= best <= 1.0
+    assert isinstance(params, dict) and "color_precision" in params
+
+
+def test_auto_vectorize_never_worse_than_baseline():
+    src = load_image(_FIXTURE, max_size=1000, bg="auto")
+    base = get_preset("clean")
+    from svgbuilder.autotune import render_svg, score
+    from svgbuilder.preprocess import quantize
+    from svgbuilder.vectorize import vectorize
+    src_rgb = src.convert("RGB")
+    base_svg = vectorize(quantize(src, colors=base["colors"], smooth=False), base)
+    base_score = score(render_svg(base_svg, src.size), src_rgb)
+    _svg, _params, best, _evals = auto_vectorize(src, base, smooth=False, budget=6)
+    assert best >= base_score - 1e-9
