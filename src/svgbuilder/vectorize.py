@@ -1,23 +1,28 @@
 """Trace a prepared RGBA image into an SVG string using VTracer."""
 
-import io
-
 import vtracer
 
 
 def vectorize(img_rgba, params):
     """Convert an RGBA PIL image to an SVG string using preset parameters.
 
-    NOTE: Passes preset params as-is to vtracer.  On Python 3.14 the pyo3
-    extension (vtracer 0.6.15) segfaults when any Optional kwarg is supplied
-    to convert_pixels_to_svg or convert_raw_image_to_svg.  As a minimal
-    workaround, the image is encoded to PNG bytes and passed to
-    convert_raw_image_to_svg without optional kwargs (the Rust defaults are
-    close to the "clean" preset and always produce valid SVG with <path
-    elements).  Once a vtracer release fixes the pyo3/Py3.14 segfault this
-    function should be updated to pass the kwargs explicitly.
+    Requires Python 3.10-3.13. The vtracer 0.6.15 cp314 wheel has a pyo3 bug
+    that segfaults whenever a tuning parameter is passed, so Python 3.14 is
+    not supported (see pyproject.toml requires-python and the README).
     """
-    buf = io.BytesIO()
-    img_rgba.save(buf, format="PNG")
-    img_bytes = buf.getvalue()
-    return vtracer.convert_raw_image_to_svg(img_bytes)
+    pixels = list(img_rgba.getdata())
+    return vtracer.convert_pixels_to_svg(
+        pixels,
+        size=img_rgba.size,
+        colormode="color",
+        hierarchical="stacked",
+        mode=params["mode"],
+        filter_speckle=params["filter_speckle"],
+        color_precision=params["color_precision"],
+        layer_difference=params["layer_difference"],
+        corner_threshold=params["corner_threshold"],
+        length_threshold=params["length_threshold"],
+        max_iterations=10,
+        splice_threshold=params["splice_threshold"],
+        path_precision=8,
+    )

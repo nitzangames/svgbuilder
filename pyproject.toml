@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Convert a raster image into a clean, simplified colored SVG."
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+# Upper bound: vtracer 0.6.15's cp314 wheel segfaults when any tuning
+# parameter is passed (pyo3/Python 3.14 bug), so 3.14 is unsupported.
+requires-python = ">=3.10,<3.14"
 authors = [{ name = "nitzanwilnai" }]
 dependencies = [
     "vtracer>=0.6.15",
