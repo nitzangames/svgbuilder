@@ -63,12 +63,17 @@ def main(argv=None):
     try:
         with open(out_path, "w") as fh:
             fh.write(svg)
-        preview_path = os.path.splitext(out_path)[0] + ".preview.png"
-        with open(preview_path, "wb") as fh:
-            fh.write(render_png_bytes(svg))
     except OSError as exc:
         print(f"error: could not write output: {exc}", file=sys.stderr)
         return 1
+
+    # Preview PNG is a convenience, not the deliverable — never let it fail the run.
+    try:
+        preview_path = os.path.splitext(out_path)[0] + ".preview.png"
+        with open(preview_path, "wb") as fh:
+            fh.write(render_png_bytes(svg))
+    except Exception as exc:
+        print(f"warning: could not write preview PNG: {exc}", file=sys.stderr)
 
     if not args.quiet:
         note = "" if report["ok"] else "  [warning: no wheels detected — extract_assets may miss them]"
