@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 58 136 78"><g transform="translate(0, 25)">
+    <!-- gray underframe block: single full-length rectangle behind the wheels, reaching the wheel centers -->
+    <rect x="-12" y="82.5" width="120" height="11.5" rx="0.7" fill="#6f6e72" stroke="#5f5e5a" stroke-width="0.6"/>
+    <!-- coal bunker at the rear -->
+    <rect x="-12" y="50" width="14" height="34" fill="#2393cc" stroke="#0c4067" stroke-width="1"/>
+    <rect x="-12" y="48" width="14" height="4" fill="#5ab4e8"/>
+    <line x1="-9" y1="55" x2="-1" y2="55" stroke="#0c4067" stroke-width="1"/>
+    <line x1="-9" y1="58" x2="-1" y2="58" stroke="#0c4067" stroke-width="1"/>
+    <line x1="-9" y1="61" x2="-1" y2="61" stroke="#0c4067" stroke-width="1"/>
+    <rect x="0" y="40" width="40" height="44" fill="#2393cc" stroke="#0c4067" stroke-width="1"/>
+    <rect x="0" y="38" width="40" height="4" fill="#5ab4e8"/>
+    <rect x="8" y="46" width="12" height="16" fill="#f4c775" stroke="#854f0b" stroke-width="1"/>
+    <rect x="22" y="46" width="12" height="16" fill="#f4c775" stroke="#854f0b" stroke-width="1"/>
+    <path d="M 36 50 Q 42 50 42 56 L 100 56 Q 106 56 106 50 L 106 78 L 36 78 Z" fill="#1d83bd" stroke="#0c4067" stroke-width="1"/>
+    <path d="M 36 50 Q 42 50 42 56 L 100 56 Q 106 56 106 50" fill="#3ba2db" stroke="#0c4067" stroke-width="0.5"/>
+    <text x="71" y="71" text-anchor="middle" style="font-family:Georgia,serif; font-size:9px; fill:#f4c775; font-weight:bold;">G.W.R.</text>
+    <rect x="34" y="78" width="76" height="6" fill="#0c4067"/>
+    <circle cx="108" cy="72" r="6" fill="#1a0808" stroke="#5f5e5a" stroke-width="1"/>
+    <circle cx="108" cy="72" r="3" fill="#fac775"/>
+    <rect x="64" y="44" width="8" height="14" fill="#1d83bd"/>
+    <rect x="62" y="40" width="12" height="6" fill="#3ba2db"/>
+    <circle cx="84" cy="50" r="3" fill="#5f5e5a"/>
+    <circle cx="12" cy="94" r="11" fill="#2c2c2a" stroke="#5f5e5a" stroke-width="2"/>
+    <circle cx="50" cy="94" r="11" fill="#2c2c2a" stroke="#5f5e5a" stroke-width="2"/>
+    <circle cx="87" cy="94" r="11" fill="#2c2c2a" stroke="#5f5e5a" stroke-width="2"/>
+    <line x1="12" y1="94" x2="87" y2="94" stroke="#5f5e5a" stroke-width="2"/>
+    <rect x="106" y="84" width="6" height="4" fill="#5a2a2a"/>
+  </g></svg>

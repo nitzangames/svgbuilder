@@ -28,9 +28,17 @@ auto = [
 llm = [
     "anthropic>=0.40",
 ]
+engine = [
+    "anthropic>=0.40",
+    "resvg-py>=0.1.5",
+]
 
 [project.scripts]
 svgbuilder = "svgbuilder.cli:main"
+enginegen = "svgbuilder.enginegen.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/svgbuilder"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/svgbuilder/enginegen/style" = "svgbuilder/enginegen/style"

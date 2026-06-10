@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 38.9 213 98.6"><g transform="translate(0, 25)" xmlns="http://www.w3.org/2000/svg">
+    <!-- ===== WHEELS (drawn first; body overlaps their tops) ===== -->
+    <!-- pilot truck (leading 4-wheel bogie -> 2 wheels in profile) -->
+    <circle cx="156" cy="102" r="8" fill="#cfcdc3"/>
+    <circle cx="156" cy="102" r="7" fill="#2c2c2a"/>
+    <circle cx="156" cy="102" r="2" fill="#0e0e0e"/>
+    <circle cx="174" cy="102" r="8" fill="#cfcdc3"/>
+    <circle cx="174" cy="102" r="7" fill="#2c2c2a"/>
+    <circle cx="174" cy="102" r="2" fill="#0e0e0e"/>
+    <!-- driving wheels: steel tire + dark spoked wheel (#2c2c2a = canvas spins it) -->
+    <circle cx="60" cy="94" r="16.5" fill="#cfcdc3"/>
+    <circle cx="60" cy="94" r="15" fill="#2c2c2a"/>
+    <g stroke="#54534d" stroke-width="1.4">
+      <line x1="46.5" y1="94" x2="73.5" y2="94"/>
+      <line x1="60" y1="80.5" x2="60" y2="107.5"/>
+      <line x1="50.45" y1="84.45" x2="69.55" y2="103.55"/>
+      <line x1="50.45" y1="103.55" x2="69.55" y2="84.45"/>
+    </g>
+    <circle cx="60" cy="94" r="3.8" fill="#0e0e0e"/>
+    <circle cx="118" cy="94" r="16.5" fill="#cfcdc3"/>
+    <circle cx="118" cy="94" r="15" fill="#2c2c2a"/>
+    <g stroke="#54534d" stroke-width="1.4">
+      <line x1="104.5" y1="94" x2="131.5" y2="94"/>
+      <line x1="118" y1="80.5" x2="118" y2="107.5"/>
+      <line x1="108.45" y1="84.45" x2="127.55" y2="103.55"/>
+      <line x1="108.45" y1="103.55" x2="127.55" y2="84.45"/>
+    </g>
+    <circle cx="118" cy="94" r="3.8" fill="#0e0e0e"/>
+    <!-- connecting (side) rod with crank pins -->
+    <rect x="58" y="92" width="62" height="4" rx="2" fill="#b07a2a"/>
+    <circle cx="60" cy="94" r="2.8" fill="#8a3b2a"/>
+    <circle cx="118" cy="94" r="2.8" fill="#8a3b2a"/>
+
+    <!-- ===== FRAME / FOOTPLATE ===== -->
+    <rect x="136" y="71" width="13" height="17" rx="2" fill="#191919"/>
+    <rect x="136" y="75" width="13" height="2" fill="#d9a834"/>
+    <rect x="2" y="80" width="188" height="8" fill="#0e0e0e"/>
+
+    <!-- cowcatcher / pilot (triangular plow pointing forward to the rail) -->
+    <rect x="178" y="79" width="8" height="5" fill="#5a2222"/>
+    <polygon points="182,80 182,107 208,107" fill="#191919"/>
+    <g stroke="#d9a834" stroke-width="1">
+      <line x1="187" y1="107" x2="187" y2="85"/>
+      <line x1="192" y1="107" x2="192" y2="90"/>
+      <line x1="197" y1="107" x2="197" y2="96"/>
+      <line x1="202" y1="107" x2="202" y2="101"/>
+    </g>
+
+    <!-- ===== CAB (rear) ===== -->
+    <rect x="2" y="50" width="46" height="33" fill="#1f6b54"/>
+    <rect x="2" y="46" width="42" height="37" fill="#1f6b54"/>
+    <rect x="2" y="46" width="4" height="37" fill="#2c8268"/>
+    <rect x="2" y="40" width="42" height="8" fill="#15493a"/>
+    <rect x="7" y="41" width="13" height="14" rx="3" fill="#0c2620" stroke="#d9a834" stroke-width="1"/>
+    <rect x="25" y="41" width="13" height="14" rx="3" fill="#0c2620" stroke="#d9a834" stroke-width="1"/>
+    <rect x="-1" y="32" width="46" height="7" rx="2.5" fill="#0e0e0e"/>
+    <rect x="1" y="38" width="44" height="1.6" fill="#d9a834"/>
+
+    <!-- ===== BOILER ===== -->
+    <rect x="42" y="50" width="116" height="31" rx="15.5" fill="#1f6b54"/>
+    <rect x="50" y="52" width="100" height="6" rx="3" fill="#2c8268"/>
+    <g fill="#d9a834">
+      <rect x="68" y="50" width="2.6" height="31"/>
+      <rect x="98" y="50" width="2.6" height="31"/>
+      <rect x="128" y="50" width="2.6" height="31"/>
+      <rect x="150" y="50" width="2.6" height="31"/>
+    </g>
+
+    <!-- ===== SMOKEBOX (black front) ===== -->
+    <rect x="154" y="47" width="42" height="35" rx="7" fill="#191919"/>
+    <rect x="156" y="49" width="4" height="31" rx="2" fill="#2a2828"/>
+    <circle cx="190" cy="64" r="8.5" fill="#242424"/>
+    <circle cx="190" cy="64" r="8.5" fill="none" stroke="#d9a834" stroke-width="1.2"/>
+    <circle cx="190" cy="64" r="2" fill="#5a2222"/>
+    <rect x="186" y="68" width="7" height="5" rx="1" fill="#d9a834"/>
+
+    <!-- ===== BOILER-TOP FITTINGS ===== -->
+    <!-- steam dome -->
+    <rect x="76" y="48" width="18" height="3" fill="#0e0e0e"/>
+    <path d="M77 50 Q77 38 85 38 Q93 38 93 50 Z" fill="#191919"/>
+    <ellipse cx="85" cy="38.5" rx="8" ry="2.6" fill="#d9a834"/>
+    <!-- sand dome -->
+    <rect x="121" y="48" width="16" height="3" fill="#0e0e0e"/>
+    <path d="M122 50 Q122 39 129 39 Q136 39 136 50 Z" fill="#191919"/>
+    <ellipse cx="129" cy="39.5" rx="7.5" ry="2.4" fill="#d9a834"/>
+    <!-- whistle + bell -->
+    <rect x="100" y="40" width="1.6" height="8" fill="#d9a834"/>
+    <circle cx="100.8" cy="39.5" r="1.4" fill="#f4c775"/>
+    <rect x="107" y="44" width="1.6" height="6" fill="#7a6a30"/>
+    <path d="M105 44.5 Q108 40 111 44.5 Z" fill="#d9a834"/>
+    <circle cx="108" cy="44.8" r="1" fill="#f4c775"/>
+
+    <!-- ===== BALLOON SMOKESTACK (slim base, concave flare, capped + finial) ===== -->
+    <rect x="163" y="45" width="11" height="5" fill="#d9a834"/>
+    <path d="M164,50 C162,44 157,38 152,32 L184,32 C179,38 174,44 172,50 Z" fill="#191919"/>
+    <path d="M164,50 C162,44 157,38 152,32 L159,32 C162,39 165,45 167,50 Z" fill="#2a2828"/>
+    <rect x="149" y="29" width="38" height="4" rx="2" fill="#0e0e0e"/>
+    <path d="M152,30 Q168,22 184,30 Z" fill="#191919"/>
+    <rect x="166.8" y="19" width="2.4" height="5" fill="#0e0e0e"/>
+    <circle cx="168" cy="18.5" r="2.6" fill="#262626"/>
+
+    <!-- ===== HEADLAMP ===== -->
+    <rect x="178" y="38" width="13" height="13" rx="1.5" fill="#191919"/>
+    <rect x="180" y="35" width="8" height="4" rx="1" fill="#0e0e0e"/>
+    <circle cx="189" cy="45" r="3.4" fill="#f4c775"/>
+    <circle cx="189" cy="45" r="3.4" fill="none" stroke="#d9a834" stroke-width="1"/>
+
+    <!-- running-board pinstripe -->
+    <rect x="2" y="81" width="184" height="1.8" fill="#d9a834"/>
+  </g></svg>
