@@ -33,7 +33,10 @@ def make_generator(model=DEFAULT_MODEL, client=None):
             system=conventions,
             messages=[{"role": "user", "content": content}],
         )
-        return next(b.text for b in response.content if b.type == "text")
+        text = next((b.text for b in response.content if b.type == "text"), None)
+        if text is None:
+            raise ValueError("model returned no text content")
+        return text
 
     def generate(photo_b64, photo_media, exemplars, conventions):
         return _ask([

@@ -6,7 +6,9 @@ WHEEL_FILL = "#2c2c2a"
 WHEEL_MIN_RADIUS = 6.0
 
 _CIRCLE_RE = re.compile(r"<circle\b[^>]*>", re.IGNORECASE)
-_ATTR_RE = re.compile(r'([\w-]+)\s*=\s*"([^"]*)"')
+# Match attributes in either single or double quotes.
+_ATTR_RE = re.compile(r"""([\w-]+)\s*=\s*["']([^"']*)["']""")
+_VIEWBOX_RE = re.compile(r"""viewbox\s*=\s*["']""", re.IGNORECASE)
 
 
 def _circles(svg):
@@ -30,7 +32,7 @@ def validate(svg):
     same shape TrainGame's extract_assets.js detects. `ok` means the sprite has a
     viewBox and at least two such wheels.
     """
-    has_viewbox = 'viewbox="' in svg.lower()
+    has_viewbox = bool(_VIEWBOX_RE.search(svg))
     wheels = [c for c in _circles(svg)
               if c["fill"] == WHEEL_FILL and c["r"] >= WHEEL_MIN_RADIUS]
     return {

@@ -223,3 +223,49 @@ def test_generate_engine_respects_rounds(tmp_path):
     )
     # 1 generate + (rounds-1)=2 revises consumed two variants
     assert svg == _SPRITE.replace("200", "202")
+
+
+def test_validate_handles_single_quoted_attributes():
+    svg = (
+        "<svg viewBox='0 0 200 100'>"
+        "<circle cx='60' cy='88' r='15' fill='#2c2c2a'/>"
+        "<circle cx='120' cy='88' r='15' fill='#2c2c2a'/>"
+        "</svg>"
+    )
+    r = validate(svg)
+    assert r["has_viewbox"] is True
+    assert r["wheel_count"] == 2 and r["ok"] is True
+
+
+def test_generate_raises_when_no_text_block():
+    class _ThinkingOnly:
+        content = [type("B", (), {"type": "thinking", "thinking": "..."})()]
+
+    class _Msgs:
+        def create(self, **kwargs):
+            return _ThinkingOnly()
+
+    class _Client:
+        messages = _Msgs()
+
+    generate, _revise = make_generator(client=_Client())
+    with pytest.raises(ValueError):
+        generate("P", "image/png", [], "C")
+
+
+def test_generate_engine_stops_when_render_fails(tmp_path):
+    def boom_render(svg):
+        raise RuntimeError("render boom")
+
+    calls = {"rev": 0}
+
+    def revise(*a):
+        calls["rev"] += 1
+        return _SPRITE.replace("200", "201")
+
+    svg, report = generate_engine(
+        _photo(tmp_path), generate=lambda *a: _SPRITE, revise=revise,
+        render=boom_render, exemplars=[], conventions="C", rounds=3,
+    )
+    assert svg == _SPRITE  # render failed on round 1 -> loop broke, baseline kept
+    assert calls["rev"] == 0
