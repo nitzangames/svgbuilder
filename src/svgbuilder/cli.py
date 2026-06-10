@@ -54,6 +54,12 @@ def _build_parser():
                         "candidates (needs the [auto] extra).")
     p.add_argument("--auto-budget", type=int, default=6, dest="auto_budget",
                    help="Max candidate evaluations for --auto (default 6).")
+    p.add_argument("--llm-refine", action="store_true", dest="llm_refine",
+                   help="Use a Claude vision model to steer auto-tuning (needs the "
+                        "[auto] and [llm] extras + an API key). Falls back to --auto "
+                        "if unavailable.")
+    p.add_argument("--llm-model", default="claude-opus-4-8", dest="llm_model",
+                   help="Claude model for --llm-refine (default claude-opus-4-8).")
     p.add_argument("--quiet", action="store_true", help="Suppress non-error output.")
     p.add_argument("--version", action="version", version=f"svgbuilder {__version__}")
     return p
@@ -70,17 +76,35 @@ def main(argv=None):
     try:
         params = build_params(args.preset, args.colors, args.filter_speckle, args.mode)
         img = load_image(args.input, max_size=args.max_size, bg=args.bg)
-        if args.auto:
+        if args.auto or args.llm_refine:
             try:
                 from .autotune import auto_vectorize
             except ImportError:
-                print("error: --auto needs the [auto] extra. Install it with: "
-                      "pip install 'svgbuilder[auto]'", file=sys.stderr)
+                print("error: --auto/--llm-refine need the [auto] extra. Install it "
+                      "with: pip install 'svgbuilder[auto]'", file=sys.stderr)
                 return 1
-            svg, params, best_score, evals = auto_vectorize(
-                img, params, smooth=not args.no_smooth, budget=args.auto_budget
-            )
-            auto_info = f"auto: score={best_score:.3f} in {evals} evals"
+
+            smooth = not args.no_smooth
+            if args.llm_refine:
+                try:
+                    from .llm_refine import llm_refine_vectorize, make_suggester
+                    suggest = make_suggester(model=args.llm_model)
+                    svg, params, best_score, evals = llm_refine_vectorize(
+                        img, params, smooth=smooth, budget=args.auto_budget, suggest=suggest
+                    )
+                    auto_info = f"llm-refine: score={best_score:.3f} in {evals} evals"
+                except Exception as exc:
+                    print(f"warning: --llm-refine unavailable ({exc}); falling back to "
+                          "deterministic auto-tuning.", file=sys.stderr)
+                    svg, params, best_score, evals = auto_vectorize(
+                        img, params, smooth=smooth, budget=args.auto_budget
+                    )
+                    auto_info = f"auto (llm fallback): score={best_score:.3f} in {evals} evals"
+            else:
+                svg, params, best_score, evals = auto_vectorize(
+                    img, params, smooth=smooth, budget=args.auto_budget
+                )
+                auto_info = f"auto: score={best_score:.3f} in {evals} evals"
         else:
             img = quantize(img, colors=params["colors"], smooth=not args.no_smooth)
             svg = vectorize(img, params)

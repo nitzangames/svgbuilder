@@ -49,3 +49,27 @@ def test_main_auto_flag_writes_svg(tmp_path):
     assert out.exists()
     text = out.read_text()
     assert "<svg" in text and "<path" in text
+
+
+def test_main_llm_refine_falls_back_when_suggester_unavailable(tmp_path, monkeypatch, capsys):
+    # Force the LLM path to fail deterministically (no network): make_suggester
+    # raises, simulating a missing key / unavailable API. The CLI must catch it,
+    # print a fallback warning, run the deterministic loop, and still write SVG.
+    import svgbuilder.llm_refine as llm_refine
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("no api key")
+
+    monkeypatch.setattr(llm_refine, "make_suggester", boom)
+
+    out = tmp_path / "llm.svg"
+    exit_code = main([
+        "tests/fixtures/sample.png", "-o", str(out),
+        "--llm-refine", "--auto-budget", "3", "--no-smooth",
+    ])
+    assert exit_code == 0
+    assert out.exists()
+    text = out.read_text()
+    assert "<svg" in text and "<path" in text
+    err = capsys.readouterr().err
+    assert "fall" in err.lower() or "deterministic" in err.lower()
