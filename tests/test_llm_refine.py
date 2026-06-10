@@ -100,3 +100,52 @@ def test_llm_refine_never_worse_than_baseline():
         src, base, smooth=False, budget=4, suggest=suggest
     )
     assert best >= base_score - 1e-9
+
+
+import json as _json
+from PIL import Image as _Image
+from svgbuilder.llm_refine import make_suggester
+
+
+class _Block:
+    def __init__(self, text):
+        self.type = "text"
+        self.text = text
+
+
+class _Resp:
+    def __init__(self, text):
+        self.content = [_Block(text)]
+
+
+class _FakeMessages:
+    def __init__(self, text, capture):
+        self._text = text
+        self._capture = capture
+
+    def create(self, **kwargs):
+        self._capture.update(kwargs)
+        return _Resp(self._text)
+
+
+class _FakeClient:
+    def __init__(self, text, capture):
+        self.messages = _FakeMessages(text, capture)
+
+
+def test_make_suggester_sends_two_images_and_parses_json():
+    capture = {}
+    fake = _FakeClient(_json.dumps({"done": False, "color_precision": 3}), capture)
+    suggest = make_suggester(model="claude-opus-4-8", client=fake)
+
+    src = _Image.new("RGB", (16, 16), (10, 120, 70))
+    cand = _Image.new("RGB", (16, 16), (10, 120, 70))
+    result = suggest(src, cand, {"color_precision": 4, "filter_speckle": 6,
+                                 "corner_threshold": 60, "mode": "spline"})
+
+    assert result == {"done": False, "color_precision": 3}
+    # two image blocks were sent to the model
+    content = capture["messages"][0]["content"]
+    image_blocks = [b for b in content if isinstance(b, dict) and b.get("type") == "image"]
+    assert len(image_blocks) == 2
+    assert capture["model"] == "claude-opus-4-8"

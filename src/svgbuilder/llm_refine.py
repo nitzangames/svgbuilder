@@ -27,6 +27,41 @@ ALLOWED = {
     "mode": ["spline", "polygon"],
 }
 
+DEFAULT_MODEL = "claude-opus-4-8"
+
+_SYSTEM = (
+    "You tune a raster-to-SVG vectorizer (VTracer). You are shown a SOURCE "
+    "image and the CURRENT vector render of it, plus the current parameters. "
+    "Suggest parameter changes that make the render match the source more "
+    "faithfully while staying clean and simple. You may ONLY change these "
+    "parameters: color_precision (2-8; higher = more colors/detail), "
+    "filter_speckle (0-12; higher = removes more small specks), "
+    "corner_threshold (30-80 degrees; higher = smoother corners), and "
+    "mode ('spline' for smooth curves or 'polygon' for crisp edges). "
+    "Return ONLY the parameters you want to change. Set done=true when the "
+    "render is already a good, clean match. Never output SVG."
+)
+
+# JSON schema for the constrained delta the model returns.
+_DELTA_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "color_precision": {"type": "integer", "enum": ALLOWED["color_precision"]},
+        "filter_speckle": {"type": "integer", "enum": ALLOWED["filter_speckle"]},
+        "corner_threshold": {"type": "integer", "enum": ALLOWED["corner_threshold"]},
+        "mode": {"type": "string", "enum": ALLOWED["mode"]},
+        "done": {"type": "boolean"},
+    },
+    "required": ["done"],
+    "additionalProperties": False,
+}
+
+
+def _png_b64(img_rgb):
+    buf = io.BytesIO()
+    img_rgb.save(buf, format="PNG")
+    return base64.standard_b64encode(buf.getvalue()).decode("ascii")
+
 
 def apply_suggestion(current_params, suggestion):
     """Return a copy of current_params with only valid, allowed deltas applied."""
@@ -95,3 +130,42 @@ def llm_refine_vectorize(source_rgba, base_params, smooth=True, budget=6, sugges
             )
 
     return best_svg, best_params, best_score, evals
+
+
+def make_suggester(model=DEFAULT_MODEL, client=None):
+    """Build a suggest(source_rgb, candidate_rgb, current_params) -> dict callable
+    backed by the Anthropic vision API. Lazily creates a default client if none
+    is given. The returned dict is the validated-by-schema JSON delta."""
+    if client is None:
+        import anthropic
+
+        client = anthropic.Anthropic()
+
+    def suggest(source_rgb, candidate_rgb, current_params):
+        shown = {k: current_params[k] for k in ALLOWED if k in current_params}
+        response = client.messages.create(
+            model=model,
+            max_tokens=1024,
+            system=_SYSTEM,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "SOURCE image:"},
+                    {"type": "image", "source": {
+                        "type": "base64", "media_type": "image/png",
+                        "data": _png_b64(source_rgb)}},
+                    {"type": "text", "text": "CURRENT vector render:"},
+                    {"type": "image", "source": {
+                        "type": "base64", "media_type": "image/png",
+                        "data": _png_b64(candidate_rgb)}},
+                    {"type": "text", "text":
+                        f"Current parameters: {json.dumps(shown)}. Suggest changes "
+                        "to improve fidelity, or set done=true if it's already good."},
+                ],
+            }],
+            output_config={"format": {"type": "json_schema", "schema": _DELTA_SCHEMA}},
+        )
+        text = next(b.text for b in response.content if b.type == "text")
+        return json.loads(text)
+
+    return suggest
