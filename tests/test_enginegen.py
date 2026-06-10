@@ -170,3 +170,56 @@ def test_revise_sends_photo_and_render():
     content = cap[0]["messages"][0]["content"]
     images = [b for b in content if isinstance(b, dict) and b.get("type") == "image"]
     assert len(images) == 2  # source photo + current render
+
+
+from svgbuilder.enginegen.loop import generate_engine
+
+_SPRITE = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">'
+    '<circle cx="60" cy="88" r="15" fill="#2c2c2a"/>'
+    '<circle cx="120" cy="88" r="15" fill="#2c2c2a"/>'
+    '</svg>'
+)
+
+
+def _photo(tmp_path):
+    p = tmp_path / "loco.png"
+    p.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 32)  # bytes are never decoded (fakes)
+    return str(p)
+
+
+def test_generate_engine_runs_and_validates(tmp_path):
+    calls = {"gen": 0, "rev": 0}
+
+    def generate(photo_b64, media, exemplars, conventions):
+        calls["gen"] += 1
+        return f"```svg\n{_SPRITE}\n```"
+
+    def revise(photo_b64, media, render_b64, current_svg, conventions):
+        calls["rev"] += 1
+        return _SPRITE  # unchanged -> loop stops
+
+    svg, report = generate_engine(
+        _photo(tmp_path), generate=generate, revise=revise,
+        render=lambda s: b"\x89PNG", exemplars=[], conventions="C", rounds=3,
+    )
+    assert "<circle" in svg
+    assert report["wheel_count"] == 2 and report["ok"] is True
+    assert calls["gen"] == 1
+    assert calls["rev"] == 1  # stopped after the first revise returned unchanged
+
+
+def test_generate_engine_respects_rounds(tmp_path):
+    # revise always returns a *different* svg, so it should run rounds-1 times.
+    variants = [_SPRITE.replace("200", "201"), _SPRITE.replace("200", "202"),
+                _SPRITE.replace("200", "203")]
+
+    def revise(photo_b64, media, render_b64, current_svg, conventions):
+        return variants.pop(0)
+
+    svg, report = generate_engine(
+        _photo(tmp_path), generate=lambda *a: _SPRITE, revise=revise,
+        render=lambda s: b"\x89PNG", exemplars=[], conventions="C", rounds=3,
+    )
+    # 1 generate + (rounds-1)=2 revises consumed two variants
+    assert svg == _SPRITE.replace("200", "202")
