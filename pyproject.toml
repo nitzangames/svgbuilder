@@ -25,6 +25,9 @@ auto = [
     "scikit-image>=0.21",
     "numpy>=1.24",
 ]
+llm = [
+    "anthropic>=0.40",
+]
 
 [project.scripts]
 svgbuilder = "svgbuilder.cli:main"
