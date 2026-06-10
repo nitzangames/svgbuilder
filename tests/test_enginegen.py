@@ -40,3 +40,45 @@ def test_extract_svg_is_case_insensitive_and_multiline():
 def test_extract_svg_missing_raises():
     with pytest.raises(ValueError):
         extract_svg("no svg here")
+
+
+from svgbuilder.enginegen.validate import validate
+
+_GOOD = (
+    '<svg viewBox="0 0 200 100">'
+    '<circle cx="60" cy="88" r="15" fill="#2c2c2a"/>'
+    '<circle cx="120" cy="88" r="15" fill="#2c2c2a"/>'
+    '<rect x="0" y="40" width="200" height="40" fill="#1f6b54"/>'
+    '</svg>'
+)
+
+
+def test_validate_good_sprite():
+    r = validate(_GOOD)
+    assert r["has_viewbox"] is True
+    assert r["wheel_count"] == 2
+    assert r["ok"] is True
+
+
+def test_validate_flags_missing_wheels():
+    svg = '<svg viewBox="0 0 10 10"><rect width="10" height="10" fill="#1f6b54"/></svg>'
+    r = validate(svg)
+    assert r["wheel_count"] == 0
+    assert r["ok"] is False
+
+
+def test_validate_flags_missing_viewbox():
+    svg = _GOOD.replace('viewBox="0 0 200 100"', "")
+    r = validate(svg)
+    assert r["has_viewbox"] is False
+    assert r["ok"] is False
+
+
+def test_validate_ignores_small_or_wrongcolor_circles():
+    svg = (
+        '<svg viewBox="0 0 200 100">'
+        '<circle cx="60" cy="88" r="2" fill="#2c2c2a"/>'      # too small (hub)
+        '<circle cx="120" cy="88" r="15" fill="#d9a834"/>'    # wrong colour
+        '</svg>'
+    )
+    assert validate(svg)["wheel_count"] == 0
