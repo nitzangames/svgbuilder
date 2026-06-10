@@ -269,3 +269,41 @@ def test_generate_engine_stops_when_render_fails(tmp_path):
     )
     assert svg == _SPRITE  # render failed on round 1 -> loop broke, baseline kept
     assert calls["rev"] == 0
+
+
+from svgbuilder.enginegen import cli as engine_cli
+
+
+def test_cli_missing_input_returns_2(tmp_path):
+    assert engine_cli.main([str(tmp_path / "nope.png")]) == 2
+
+
+def test_cli_end_to_end_with_fake_generator(tmp_path, monkeypatch):
+    # Replace the real Anthropic-backed generator with fakes (no network).
+    def fake_make_generator(model=None, client=None):
+        def generate(photo_b64, media, exemplars, conventions):
+            return _SPRITE
+        def revise(photo_b64, media, render_b64, current_svg, conventions):
+            return _SPRITE
+        return generate, revise
+
+    monkeypatch.setattr(engine_cli, "make_generator", fake_make_generator)
+
+    src = tmp_path / "loco.png"
+    src.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 32)
+    out = tmp_path / "engine.svg"
+    code = engine_cli.main([str(src), "-o", str(out), "--rounds", "2", "--quiet"])
+    assert code == 0
+    assert out.exists() and "<circle" in out.read_text()
+    assert (tmp_path / "engine.preview.png").exists()
+
+
+def test_cli_reports_setup_error_when_generator_unavailable(tmp_path, monkeypatch, capsys):
+    def boom(*a, **k):
+        raise RuntimeError("no api key")
+    monkeypatch.setattr(engine_cli, "make_generator", boom)
+    src = tmp_path / "loco.png"
+    src.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 32)
+    code = engine_cli.main([str(src), "--quiet"])
+    assert code == 1
+    assert "no api key" in capsys.readouterr().err
