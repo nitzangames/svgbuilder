@@ -99,6 +99,22 @@ deterministic `--auto` loop — so the command always produces an SVG.
 Color quantization uses Pillow's deterministic FASTOCTREE with dithering off, so
 the same input and flags always produce the same SVG.
 
+## enginegen — photo → designed engine sprite
+
+`enginegen` is a separate command that *generates* a clean, hand-drawn-style
+locomotive SVG resembling an input photo — for use as a game sprite — rather than
+tracing the photo's pixels. It uses a Claude vision model (default
+`claude-opus-4-8`) to author the SVG in a fixed house style, refining it over a
+few render→critique→revise rounds.
+
+    pip install 'svgbuilder[engine]'
+    export ANTHROPIC_API_KEY=sk-ant-...
+    enginegen loco.jpg -o my-engine.svg --rounds 3
+
+Output: a `.svg` (+ a `.preview.png`). It bundles a few house-style exemplars;
+add `--style-ref FILE` to bias toward a closest match. Requires an API key — the
+model is the tool, so there is no offline fallback.
+
 ## License
 
 MIT
