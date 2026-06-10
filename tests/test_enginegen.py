@@ -92,3 +92,27 @@ def test_render_png_bytes_returns_png():
     data = render_png_bytes(svg)
     assert isinstance(data, (bytes, bytearray))
     assert bytes(data[:4]) == b"\x89PNG"
+
+
+from svgbuilder.enginegen.exemplars import load_exemplars, load_conventions
+
+
+def test_load_exemplars_returns_named_svgs():
+    ex = load_exemplars()
+    assert len(ex) == 3
+    names = [n for n, _ in ex]
+    assert "classic-american-4-4-0.svg" in names
+    for _name, svg in ex:
+        assert "<svg" in svg
+
+
+def test_load_exemplars_includes_extra_refs(tmp_path):
+    ref = tmp_path / "mine.svg"
+    ref.write_text('<svg viewBox="0 0 1 1"></svg>')
+    ex = load_exemplars(extra_paths=[str(ref)])
+    assert ("mine.svg", '<svg viewBox="0 0 1 1"></svg>') in ex
+    assert len(ex) == 4
+
+
+def test_load_conventions_nonempty():
+    assert "WHEELS" in load_conventions()
