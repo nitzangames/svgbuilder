@@ -53,7 +53,7 @@ def _build_parser():
                    help="Auto-tune tracing parameters by rendering and scoring "
                         "candidates (needs the [auto] extra).")
     p.add_argument("--auto-budget", type=int, default=6, dest="auto_budget",
-                   help="Max candidate evaluations for --auto (default 6).")
+                   help="Max candidate evaluations for --auto/--llm-refine (default 6).")
     p.add_argument("--llm-refine", action="store_true", dest="llm_refine",
                    help="Use a Claude vision model to steer auto-tuning (needs the "
                         "[auto] and [llm] extras + an API key). Falls back to --auto "
