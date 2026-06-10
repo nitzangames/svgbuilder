@@ -116,3 +116,57 @@ def test_load_exemplars_includes_extra_refs(tmp_path):
 
 def test_load_conventions_nonempty():
     assert "WHEELS" in load_conventions()
+
+
+from svgbuilder.enginegen.generate import make_generator
+
+
+class _Block:
+    def __init__(self, text):
+        self.type = "text"
+        self.text = text
+
+
+class _Resp:
+    def __init__(self, text):
+        self.content = [_Block(text)]
+
+
+class _FakeMessages:
+    def __init__(self, text, capture):
+        self._text, self._capture = text, capture
+
+    def create(self, **kwargs):
+        self._capture.append(kwargs)
+        return _Resp(self._text)
+
+
+class _FakeClient:
+    def __init__(self, text, capture):
+        self.messages = _FakeMessages(text, capture)
+
+
+def test_generate_sends_photo_and_returns_text():
+    cap = []
+    fake = _FakeClient("<svg/>", cap)
+    generate, _revise = make_generator(model="claude-opus-4-8", client=fake)
+    out = generate("BASE64PHOTO", "image/jpeg",
+                   [("ex.svg", "<svg/>")], "CONVENTIONS")
+    assert out == "<svg/>"
+    content = cap[0]["messages"][0]["content"]
+    images = [b for b in content if isinstance(b, dict) and b.get("type") == "image"]
+    assert len(images) == 1
+    assert images[0]["source"]["media_type"] == "image/jpeg"
+    assert cap[0]["model"] == "claude-opus-4-8"
+    assert cap[0]["system"] == "CONVENTIONS"
+
+
+def test_revise_sends_photo_and_render():
+    cap = []
+    fake = _FakeClient("<svg2/>", cap)
+    _generate, revise = make_generator(model="claude-opus-4-8", client=fake)
+    out = revise("PHOTO64", "image/png", "RENDER64", "<svg/>", "CONVENTIONS")
+    assert out == "<svg2/>"
+    content = cap[0]["messages"][0]["content"]
+    images = [b for b in content if isinstance(b, dict) and b.get("type") == "image"]
+    assert len(images) == 2  # source photo + current render
