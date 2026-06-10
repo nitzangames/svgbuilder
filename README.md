@@ -32,18 +32,27 @@ Examples:
 
 ### Presets
 
-| Preset     | Colors | Look                              |
-|------------|--------|-----------------------------------|
-| `flat`     | 8      | Flat, poster-like, fewest paths   |
-| `clean`    | 16     | Clean simplified (default)        |
-| `detailed` | 24     | More faithful, larger file        |
+| Preset     | Colors | Downscale | Look                                         |
+|------------|--------|-----------|----------------------------------------------|
+| `minimal`  | 4      | 450px     | Bold flat poster, very few shapes            |
+| `simple`   | 6      | 450px     | Clean simplified illustration                |
+| `flat`     | 8      | full      | Flat, poster-like                            |
+| `clean`    | 16     | full      | Clean simplified (default)                   |
+| `detailed` | 24     | full      | More faithful, largest file                  |
+
+The `minimal`/`simple` presets downscale to 450px before tracing — the main lever
+for a simpler look — while keeping a moderate speckle filter so the gaps around
+wheels survive and stay distinct from the body. This works best on subjects with
+tonal contrast (a green engine with black wheels). An all-black subject has no
+color separation between wheels and frame even in the source, so it tends toward
+a solid silhouette at low color counts.
 
 ### Options
 
 - `--colors N`            override palette size
 - `--filter-speckle N`    higher = removes more small specks
 - `--mode spline|polygon` smooth curves vs crisp edges
-- `--max-size PX`         downscale longest edge (default 1000)
+- `--max-size PX`         downscale longest edge (overrides the preset's value; lower = simpler)
 - `--no-smooth`           disable denoising before quantization
 - `--bg auto|white|none`  background handling for transparent images
 - `--auto`                tune params by render+score (needs the `[auto]` extra)

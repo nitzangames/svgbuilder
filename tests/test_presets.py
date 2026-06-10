@@ -29,4 +29,21 @@ def test_unknown_preset_raises_valueerror():
 
 
 def test_preset_names_listed():
-    assert set(PRESET_NAMES) == {"flat", "clean", "detailed"}
+    assert set(PRESET_NAMES) == {"minimal", "simple", "flat", "clean", "detailed"}
+
+
+def test_simple_is_6_colors_and_downscales():
+    p = get_preset("simple")
+    assert p["colors"] == 6
+    assert p["max_size"] == 450
+
+
+def test_minimal_is_4_colors_and_downscales():
+    p = get_preset("minimal")
+    assert p["colors"] == 4
+    assert p["max_size"] == 450
+
+
+def test_full_presets_keep_full_resolution():
+    for name in ("flat", "clean", "detailed"):
+        assert get_preset(name)["max_size"] == 1000

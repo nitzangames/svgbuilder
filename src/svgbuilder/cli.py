@@ -43,8 +43,9 @@ def _build_parser():
                    help="Override speckle filter size (higher = cleaner).")
     p.add_argument("--mode", choices=["spline", "polygon"],
                    help="Override curve mode (spline=smooth, polygon=crisp).")
-    p.add_argument("--max-size", type=int, default=1000, dest="max_size",
-                   help="Downscale so the longest edge is at most this (default 1000).")
+    p.add_argument("--max-size", type=int, default=None, dest="max_size",
+                   help="Downscale so the longest edge is at most this "
+                        "(overrides the preset's value; lower = simpler).")
     p.add_argument("--no-smooth", action="store_true",
                    help="Disable median-filter denoising before quantization.")
     p.add_argument("--bg", choices=["auto", "white", "none"], default="auto",
@@ -75,7 +76,8 @@ def main(argv=None):
     auto_info = None
     try:
         params = build_params(args.preset, args.colors, args.filter_speckle, args.mode)
-        img = load_image(args.input, max_size=args.max_size, bg=args.bg)
+        max_size = args.max_size if args.max_size is not None else params["max_size"]
+        img = load_image(args.input, max_size=max_size, bg=args.bg)
         if args.auto or args.llm_refine:
             try:
                 from .autotune import auto_vectorize

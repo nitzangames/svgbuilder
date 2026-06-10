@@ -39,6 +39,37 @@ def test_main_missing_file_returns_nonzero(tmp_path):
     assert exit_code == 2  # missing input has its own exit code, distinct from 1
 
 
+def _wide_fixture(tmp_path):
+    src = tmp_path / "big.png"
+    img = Image.new("RGBA", (900, 300), (0, 128, 0, 255))
+    for x in range(450):
+        for y in range(300):
+            img.putpixel((x, y), (200, 30, 30, 255))
+    img.save(src)
+    return src
+
+
+def _svg_width(text):
+    import re
+    return int(re.search(r'width="(\d+)"', text).group(1))
+
+
+def test_preset_max_size_downscales(tmp_path):
+    # 'simple' carries max_size=450, so a 900px-wide input is downscaled.
+    src = _wide_fixture(tmp_path)
+    out = tmp_path / "o.svg"
+    assert main([str(src), "-o", str(out), "--preset", "simple", "--quiet"]) == 0
+    assert _svg_width(out.read_text()) <= 450
+
+
+def test_max_size_flag_overrides_preset(tmp_path):
+    src = _wide_fixture(tmp_path)
+    out = tmp_path / "o.svg"
+    assert main([str(src), "-o", str(out), "--preset", "simple",
+                 "--max-size", "200", "--quiet"]) == 0
+    assert _svg_width(out.read_text()) <= 200
+
+
 def test_main_auto_flag_writes_svg(tmp_path):
     out = tmp_path / "auto.svg"
     exit_code = main([
