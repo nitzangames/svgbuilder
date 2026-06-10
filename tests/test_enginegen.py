@@ -82,3 +82,13 @@ def test_validate_ignores_small_or_wrongcolor_circles():
         '</svg>'
     )
     assert validate(svg)["wheel_count"] == 0
+
+
+from svgbuilder.enginegen.render import render_png_bytes
+
+
+def test_render_png_bytes_returns_png():
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><rect width="20" height="10" fill="red"/></svg>'
+    data = render_png_bytes(svg)
+    assert isinstance(data, (bytes, bytearray))
+    assert bytes(data[:4]) == b"\x89PNG"
